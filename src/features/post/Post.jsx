@@ -36,7 +36,12 @@ export default function Post({ data }) {
 
         {/* Author & Date */}
         <div className="flex items-center gap-1.5 text-[12px] text-gray-500 mb-2">
-          <div className="w-5 h-5 rounded-full bg-gray-300"></div>
+          <div
+            className="w-5 h-5 rounded-full bg-gray-300 bg-cover bg-center"
+            style={{
+              backgroundImage: `url("https://images.rawpixel.com/image_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAxL3JtNjA5LXNvbGlkaWNvbi13LTAwMi14LmpwZw.jpg")`,
+            }}
+          ></div>
           <span>{data?._embedded?.author?.[0].name}</span>
           <span className="text-gray-300">•</span>
           <span>
