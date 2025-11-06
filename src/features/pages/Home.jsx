@@ -6,7 +6,7 @@ import Posts from "../post/Posts";
 
 export default function Home() {
   const dispatch = useDispatch();
-  const { listPosts } = useSelector((state) => state.posts);
+  const { listPosts } = useSelector((state) => state.postData);
   const { loading } = useSelector((state) => state.async);
 
   useDataCollections({

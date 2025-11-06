@@ -38,7 +38,13 @@ class REALYTICLAB_THEME {
         ));
         add_theme_support('post-thumbnails');
         add_theme_support('title-tag');
+        // add_theme_support('menus');
         add_theme_support('html5', ['search-form', 'comment-form', 'gallery']);
+        register_nav_menus([
+            'primary_menu'      => 'Main Menu',
+            'secondary_menu'    => 'Secondary Menu',
+            'footer_menu'       => 'Footer Menu',
+        ]);
     }
 
     public function theme_info_api () {
@@ -81,6 +87,34 @@ class REALYTICLAB_THEME {
                 ];
             },
             'permission_callback' => '__return_true',
+        ]);
+        
+        register_rest_route('theme/v1', '/menus', [
+            'methods' => 'GET',
+            'callback' => function () {
+                $locations = get_nav_menu_locations();
+                $data = [];
+
+                foreach ($locations as $location => $menu_id) {
+                    $menu_obj = wp_get_nav_menu_object($menu_id);
+                    $menu_items = wp_get_nav_menu_items($menu_id);
+
+                    $data[$location] = [
+                        'id' => $menu_id,
+                        'name' => $menu_obj ? $menu_obj->name : '',
+                        'slug' => $menu_obj ? $menu_obj->slug : '',
+                        'items' => array_map(function ($item) {
+                            return [
+                            'ID' => $item->ID,
+                            'title' => $item->title,
+                            'url' => $item->url,
+                            'parent' => $item->menu_item_parent,
+                            ];
+                        }, $menu_items ?: []),
+                    ];
+                }
+                return $data;
+            }
         ]);
     }
 }

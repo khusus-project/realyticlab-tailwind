@@ -1,5 +1,5 @@
 import React from "react";
-import Post from "./Post";
+import PostItem from "./PostItem";
 
 export default function Posts({ data, loading }) {
   if (loading) return <>Loading...</>;
@@ -15,7 +15,7 @@ export default function Posts({ data, loading }) {
       "
     >
       {data?.map((post) => (
-        <Post key={post.id} data={post} />
+        <PostItem key={post.id} data={post} />
       ))}
     </div>
   );

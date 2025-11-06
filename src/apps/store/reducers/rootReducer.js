@@ -1,9 +1,10 @@
+import { combineReducers } from "@reduxjs/toolkit";
 import asyncReducer from "./asyncReducer";
 import postReducer from "./postReducer";
 
-const rootReducers = {
+const rootReducers = combineReducers({
     async: asyncReducer,
-    posts: postReducer,
-}
+    postData: postReducer,
+})
 
 export default rootReducers;
