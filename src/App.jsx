@@ -10,7 +10,7 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div>
       <Header title={theme?.site_title} loading={loading} />
       <main className="">
         <MainRoutes initialized={initialized} />
