@@ -2,7 +2,6 @@ import { useDispatch, useSelector } from "react-redux";
 import useDataCollections from "../../apps/hooks/useDataCollections";
 import Sidebar from "./components/sidebar/Sidebar";
 import { listenToAllPosts } from "../../apps/store/actions/postAction";
-import PageNotFound from "../../common/error-page/PageNotFound";
 
 export default function PostContent({ post, loading }) {
   const { listPosts } = useSelector((state) => state.postData);

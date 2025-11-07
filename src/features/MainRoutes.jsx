@@ -9,9 +9,10 @@ export default function MainRoutes({ initialized }) {
   if (!initialized) return <>Loading...</>;
   return (
     <Routes>
+      {/* redirect "/" ke "/home" */}
       <Route path="/" element={<Home />} />
-      <Route path="/about" element={<About />} />
-      <Route path=":slug" element={<Post />} />
+      <Route path="about" element={<About />} />
+      <Route path="post/:slug" element={<Post />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
