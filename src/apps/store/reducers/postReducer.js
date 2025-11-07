@@ -3,7 +3,7 @@ export const READ_POST = "READ_POST";
 
 const initialState = {
   listPosts: [],
-  post: null,
+  post: {},
 };
 
 export default function postReducer(state = initialState, { type, payload }) {

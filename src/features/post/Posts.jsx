@@ -14,7 +14,7 @@ export default function Posts({ data, loading }) {
         xl:grid-cols-4
       "
     >
-      {data?.map((post) => (
+      {data?.slice(0,4)?.map((post) => (
         <PostItem key={post.id} data={post} />
       ))}
     </div>

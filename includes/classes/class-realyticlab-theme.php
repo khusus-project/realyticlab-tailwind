@@ -100,20 +100,22 @@ class REALYTICLAB_THEME {
                     $menu_items = wp_get_nav_menu_items($menu_id);
 
                     $data[$location] = [
-                        'id' => $menu_id,
+                        'id'   => $menu_id,
                         'name' => $menu_obj ? $menu_obj->name : '',
                         'slug' => $menu_obj ? $menu_obj->slug : '',
                         'items' => array_map(function ($item) {
-                            return [
-                            'ID' => $item->ID,
-                            'title' => $item->title,
-                            'url' => $item->url,
-                            'parent' => $item->menu_item_parent,
-                            ];
+                            // Konversi seluruh atribut dari objek ke array
+                            $item_data = get_object_vars($item);
+
+                            // Kalau kamu ingin tambahkan ACF atau meta lain:
+                            // $item_data['acf'] = get_fields($item->ID);
+
+                            return $item_data;
                         }, $menu_items ?: []),
                     ];
                 }
-                return $data;
+
+                return rest_ensure_response($data);
             }
         ]);
     }

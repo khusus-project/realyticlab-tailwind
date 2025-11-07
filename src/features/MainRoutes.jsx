@@ -3,14 +3,16 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Post from "./post/Post";
+import PageNotFound from "../common/error-page/PageNotFound";
 
 export default function MainRoutes({ initialized }) {
   if (!initialized) return <>Loading...</>;
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="about" element={<About />} />
+      <Route path="/about" element={<About />} />
       <Route path=":slug" element={<Post />} />
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 }
