@@ -21,8 +21,19 @@ class REALYTICLAB_THEME {
     protected function setup_hooks() {
         add_action("after_setup_theme", [$this, "setup_theme"]);
         add_action('rest_api_init', [$this, "theme_info_api"]);
-    }
 
+        /** 🔐 JWT CUSTOMIZATION HOOKS */
+        add_filter('jwt_auth_payload', [$this, 'extend_jwt_payload'], 10, 2);
+        add_filter('jwt_auth_token_before_sign', [$this, 'extend_jwt_payload'], 10, 2);
+        add_filter('jwt_auth_token_before_dispatch', [$this, 'extend_jwt_response'], 10, 2);
+
+        // 🧩 Integrasi token JWT ke REST API bawaan
+        add_filter('rest_authentication_errors', [$this, 'allow_jwt_auth_for_rest'], 10, 1);
+
+        // 🧠 Tambah data user lengkap di /wp/v2/users/me
+        add_filter('rest_prepare_user', [$this, 'extend_rest_user_data'], 10, 3);
+    }
+    
     public function setup_theme() {
         add_theme_support('custom-logo', [
             'height'      => 250,
@@ -104,19 +115,94 @@ class REALYTICLAB_THEME {
                         'name' => $menu_obj ? $menu_obj->name : '',
                         'slug' => $menu_obj ? $menu_obj->slug : '',
                         'items' => array_map(function ($item) {
-                            // Konversi seluruh atribut dari objek ke array
                             $item_data = get_object_vars($item);
-
-                            // Kalau kamu ingin tambahkan ACF atau meta lain:
-                            // $item_data['acf'] = get_fields($item->ID);
-
                             return $item_data;
                         }, $menu_items ?: []),
                     ];
                 }
 
                 return rest_ensure_response($data);
-            }
+            },
+            'permission_callback' => '__return_true',
         ]);
+    }
+
+    /** =============================
+     *  🔐 JWT CUSTOMIZATION FUNCTIONS
+     * ============================= */
+
+    /**
+     * Tambah data ke JWT bagian payload (di dalam token)
+     */
+    public function extend_jwt_payload($payload, $user) {
+        if ($user instanceof \WP_User) {
+
+            // Hapus field bawaan yang bikin dobel
+            unset($payload['user_email']);
+            unset($payload['user_nicename']);
+            unset($payload['user_display_name']);
+
+            $payload['user_id'] = $user->ID;
+            $payload['user_email'] = $user->user_email;
+            $payload['display_name'] = $user->display_name;
+            $payload['roles'] = $user->roles;
+            $payload['avatar'] = get_avatar_url($user->ID);
+        }
+        return $payload;
+    }
+
+    public function extend_jwt_response($data, $user) {
+        if ($user instanceof \WP_User) {
+            
+            // Hapus field bawaan yang bikin dobel
+            // unset($data['user_email']);
+            unset($data['user_nicename']);
+            unset($data['user_display_name']);
+
+            $data['user_id'] = $user->ID;
+            
+            $data['user_email'] = $user->user_email;
+            $data['display_name'] = $user->display_name;
+            $data['roles'] = $user->roles;
+            $data['avatar'] = get_avatar_url($user->ID);
+        }
+        return $data;
+    }
+
+    /**
+     * 🧩 Integrasikan JWT agar /wp/v2/users/me mengenali Authorization header
+     */
+    public function allow_jwt_auth_for_rest($result) {
+        if (!empty($result)) {
+            return $result; // Kalau sudah ada error lain, jangan ganggu
+        }
+
+        $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? false;
+
+        if ($auth && function_exists('jwt_auth_validate_token')) {
+            $token = str_replace('Bearer ', '', $auth);
+            $validate = jwt_auth_validate_token($token);
+
+            if ($validate && !is_wp_error($validate)) {
+                $user_id = $validate->data->user->id ?? null;
+                if ($user_id) {
+                    wp_set_current_user($user_id);
+                    return true; // ✅ Token valid, anggap user sudah login
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    public function extend_rest_user_data($response, $user, $request) {
+        if ($user instanceof \WP_User) {
+            $data = $response->get_data();
+            $data['email'] = $user->user_email;
+            $data['roles'] = $user->roles;
+            $data['avatar'] = get_avatar_url($user->ID);
+            $response->set_data($data);
+        }
+        return $response;
     }
 }
